@@ -23,3 +23,7 @@ def test_validate_injection_disks_input_false():
 
 def test_validate_malicious_code_disks_input_false():
     assert validate_disks_input(['eval', 'os.']) is False
+
+
+def test_validate_letter_disks_input_true():
+    assert validate_disks_input(['C']) is True
