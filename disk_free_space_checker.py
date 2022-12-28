@@ -72,10 +72,10 @@ def validate_min_free_space_input(min_free_space: str) -> bool:
     return min_free_space.isdigit() and int(min_free_space) > 0
 
 
-def check_min_free_space_input_bounds(min_free_space: int, disks: list[str]) -> bool:
+def check_min_free_space_input_bounds(min_free_space_GB: int, disks: list[str]) -> bool:
     for disk in disks:
-        if get_disk_total_space_in_GB(disk) <= min_free_space:
-            print(f'Wanted minimum free space is {min_free_space} GB, but disk {disk} has only {get_disk_total_space_in_GB(disk)} GB of total space.')
+        if get_disk_total_space_in_GB(disk) <= min_free_space_GB:
+            print(f'Wanted minimum free space is {min_free_space_GB} GB, but disk {disk} has only {get_disk_total_space_in_GB(disk)} GB of total space.')
             return False
 
     return True
