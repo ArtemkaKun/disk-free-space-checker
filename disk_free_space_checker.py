@@ -1,3 +1,4 @@
+import os
 import re
 
 import psutil
@@ -6,9 +7,27 @@ import argparse
 
 def validate_disks_input(disks_input: list[str]) -> bool:
     if not all(re.match(r'^[A-Z]$', disk) for disk in disks_input):
+        print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
         return False
 
+    for disk in disks_input:
+        if disk_exists(disk) is False:
+            print(f'Disk {disk} does not exist.')
+            return False
+
     return True
+
+
+def disk_exists(disk_letter):
+    partitions = psutil.disk_partitions()
+
+    for partition in partitions:
+        found_disk_letter, _ = os.path.splitdrive(partition.device)
+
+        if found_disk_letter == disk_letter + ':':
+            return True
+
+    return False
 
 
 def validate_min_space_input(min_free_space: str) -> bool:
@@ -56,7 +75,6 @@ if __name__ == '__main__':
     disks_input, min_free_space_input = get_input()
 
     if validate_disks_input(disks_input) is False:
-        print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
         exit(1)
 
     if validate_min_space_input(min_free_space_input) is False:
