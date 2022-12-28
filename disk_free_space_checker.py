@@ -5,6 +5,23 @@ import psutil
 import argparse
 
 
+def check_disk_free_space():
+    disks_input, min_free_space_input = get_input()
+    if validate_disks_input(disks_input) is False:
+        exit(1)
+    if validate_min_space_input(min_free_space_input) is False:
+        print('Invalid "--min-free-space" input. You must input only a number that represents space in GB (for example, for 10 GB input 10)')
+        exit(1)
+    if check_min_free_space_input_bounds(int(min_free_space_input), disks_input) is False:
+        exit(1)
+    for disk in disks_input:
+        free_space = get_disk_free_space_in_GB(disk)
+        if free_space < int(min_free_space_input):
+            print(f'Not enough free space on disk {disk}: {free_space} GB, minimum required: {min_free_space_input} GB')
+            exit(1)
+    exit(0)
+
+
 def validate_disks_input(disks_input: list[str]) -> bool:
     if not all(re.match(r'^[A-Z]$', disk) for disk in disks_input):
         print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
@@ -70,22 +87,4 @@ def parse_arguments() -> argparse.Namespace:
 
 
 if __name__ == '__main__':
-    disks_input, min_free_space_input = get_input()
-
-    if validate_disks_input(disks_input) is False:
-        exit(1)
-
-    if validate_min_space_input(min_free_space_input) is False:
-        print('Invalid "--min-free-space" input. You must input only a number that represents space in GB (for example, for 10 GB input 10)')
-        exit(1)
-
-    if check_min_free_space_input_bounds(int(min_free_space_input), disks_input) is False:
-        exit(1)
-
-    for disk in disks_input:
-        free_space = get_disk_free_space_in_GB(disk)
-        if free_space < int(min_free_space_input):
-            print(f'Not enough free space on disk {disk}: {free_space} GB, minimum required: {min_free_space_input} GB')
-            exit(1)
-
-    exit(0)
+    check_disk_free_space()
