@@ -44,11 +44,11 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def validate_disks_input(disks_input: list[str]) -> bool:
-    if not all(re.match(r'^[A-Z]$', disk) for disk in disks_input):
-        print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
-        return False
-
     for disk in disks_input:
+        if re.match(r'^[A-Z]$', disk) is False:
+            print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
+            return False
+
         if disk_exists(disk) is False:
             print(f'Disk {disk} does not exist.')
             return False
@@ -67,10 +67,7 @@ def disk_exists(disk_letter):
 
 
 def validate_min_space_input(min_free_space: str) -> bool:
-    if min_free_space.isdigit() is False or int(min_free_space) < 0:
-        return False
-
-    return True
+    return min_free_space.isdigit() and int(min_free_space) > 0
 
 
 def check_min_free_space_input_bounds(min_free_space: int, disks: list[str]) -> bool:
