@@ -21,8 +21,7 @@ def validate_min_space_input(min_free_space: str) -> bool:
 def check_min_free_space_input_bounds(min_free_space: int, disks: list[str]) -> bool:
     for disk in disks:
         if get_disk_total_space_in_GB(disk) <= min_free_space:
-            print(
-                f'Wanted minimum free space is {min_free_space} GB, but disk {disk} has only {get_disk_total_space_in_GB(disk)} GB of total space.')
+            print(f'Wanted minimum free space is {min_free_space} GB, but disk {disk} has only {get_disk_total_space_in_GB(disk)} GB of total space.')
             return False
 
     return True
@@ -40,14 +39,21 @@ def convert_bytes_to_GB(value_in_bytes: int) -> float:
     return value_in_bytes / 1024 ** 3
 
 
-if __name__ == '__main__':
+def get_input() -> tuple[list[str], str]:
+    args = parse_arguments()
+    return args.disks, args.min_free_space[0]
+
+
+def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Checks free space on disks')
     parser.add_argument('--disks', nargs='+', required=True, help='Letters of disks will need be to checked')
     parser.add_argument('--min-free-space', nargs=1, required=True, help='Minimum free space in GB')
 
-    args = parser.parse_args()
-    disks_input = args.disks
-    min_free_space_input = args.min_free_space[0]
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    disks_input, min_free_space_input = get_input()
 
     if validate_disks_input(disks_input) is False:
         print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
