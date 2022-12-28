@@ -7,19 +7,40 @@ import argparse
 
 def check_disk_free_space():
     disks_input, min_free_space_input = get_input()
+
     if validate_disks_input(disks_input) is False:
         exit(1)
+
     if validate_min_space_input(min_free_space_input) is False:
         print('Invalid "--min-free-space" input. You must input only a number that represents space in GB (for example, for 10 GB input 10)')
         exit(1)
-    if check_min_free_space_input_bounds(int(min_free_space_input), disks_input) is False:
+
+    min_free_space_GB = int(min_free_space_input)
+
+    if check_min_free_space_input_bounds(min_free_space_GB, disks_input) is False:
         exit(1)
+
     for disk in disks_input:
         free_space = get_disk_free_space_in_GB(disk)
-        if free_space < int(min_free_space_input):
+
+        if free_space < min_free_space_GB:
             print(f'Not enough free space on disk {disk}: {free_space} GB, minimum required: {min_free_space_input} GB')
             exit(1)
+
     exit(0)
+
+
+def get_input() -> tuple[list[str], str]:
+    args = parse_arguments()
+    return args.disks, args.min_free_space[0]
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Checks free space on disks')
+    parser.add_argument('--disks', nargs='+', required=True, help='Letters of disks will need be to checked')
+    parser.add_argument('--min-free-space', nargs=1, required=True, help='Minimum free space in GB')
+
+    return parser.parse_args()
 
 
 def validate_disks_input(disks_input: list[str]) -> bool:
@@ -71,19 +92,6 @@ def get_disk_free_space_in_GB(disk: str) -> float:
 
 def convert_bytes_to_GB(value_in_bytes: int) -> float:
     return value_in_bytes / 1024 ** 3
-
-
-def get_input() -> tuple[list[str], str]:
-    args = parse_arguments()
-    return args.disks, args.min_free_space[0]
-
-
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Checks free space on disks')
-    parser.add_argument('--disks', nargs='+', required=True, help='Letters of disks will need be to checked')
-    parser.add_argument('--min-free-space', nargs=1, required=True, help='Minimum free space in GB')
-
-    return parser.parse_args()
 
 
 if __name__ == '__main__':
