@@ -4,14 +4,16 @@ import re
 import psutil
 import argparse
 
+from psutil._common import sdiskusage
 
-def check_disk_free_space():
-    disks_input, min_free_space_input = get_input()
+
+def check_disks_free_space():
+    disks_input, min_free_space_input = parse_input_arguments()
 
     if validate_disks_input(disks_input) is False:
         exit(1)
 
-    if validate_min_space_input(min_free_space_input) is False:
+    if validate_min_free_space_input(min_free_space_input) is False:
         print('Invalid "--min-free-space" input. You must input only a number that represents space in GB (for example, for 10 GB input 10)')
         exit(1)
 
@@ -21,16 +23,16 @@ def check_disk_free_space():
         exit(1)
 
     for disk in disks_input:
-        free_space = get_disk_free_space_in_GB(disk)
+        disk_free_space = get_disk_free_space_in_GB(disk)
 
-        if free_space < min_free_space_GB:
-            print(f'Not enough free space on disk {disk}: {free_space} GB, minimum required: {min_free_space_input} GB')
+        if disk_free_space < min_free_space_GB:
+            print(f'Not enough free space on disk {disk}: {disk_free_space} GB, minimum required: {min_free_space_input} GB')
             exit(1)
 
     exit(0)
 
 
-def get_input() -> tuple[list[str], str]:
+def parse_input_arguments() -> tuple[list[str], str]:
     args = parse_arguments()
     return args.disks, args.min_free_space[0]
 
@@ -43,8 +45,8 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_disks_input(disks_input: list[str]) -> bool:
-    for disk in disks_input:
+def validate_disks_input(disks: list[str]) -> bool:
+    for disk in disks:
         if re.match(r'^[A-Z]$', disk) is False:
             print('Invalid "--disks" input. You must input only letters of disks (for example C D E)')
             return False
@@ -66,7 +68,7 @@ def disk_exists(disk_letter):
     return False
 
 
-def validate_min_space_input(min_free_space: str) -> bool:
+def validate_min_free_space_input(min_free_space: str) -> bool:
     return min_free_space.isdigit() and int(min_free_space) > 0
 
 
@@ -79,12 +81,16 @@ def check_min_free_space_input_bounds(min_free_space: int, disks: list[str]) -> 
     return True
 
 
-def get_disk_total_space_in_GB(disk: str) -> float:
-    return convert_bytes_to_GB(psutil.disk_usage(f'{disk}:\\').total)
+def get_disk_total_space_in_GB(disk_letter: str) -> float:
+    return convert_bytes_to_GB(get_disk_info_by_disk_letter(disk_letter).total)
 
 
-def get_disk_free_space_in_GB(disk: str) -> float:
-    return convert_bytes_to_GB(psutil.disk_usage(f'{disk}:\\').free)
+def get_disk_free_space_in_GB(disk_letter: str) -> float:
+    return convert_bytes_to_GB(get_disk_info_by_disk_letter(disk_letter).free)
+
+
+def get_disk_info_by_disk_letter(disk_letter: str) -> sdiskusage:
+    return psutil.disk_usage(f'{disk_letter}:\\')
 
 
 def convert_bytes_to_GB(value_in_bytes: int) -> float:
@@ -92,4 +98,4 @@ def convert_bytes_to_GB(value_in_bytes: int) -> float:
 
 
 if __name__ == '__main__':
-    check_disk_free_space()
+    check_disks_free_space()
