@@ -19,9 +19,7 @@ def validate_disks_input(disks_input: list[str]) -> bool:
 
 
 def disk_exists(disk_letter):
-    partitions = psutil.disk_partitions()
-
-    for partition in partitions:
+    for partition in psutil.disk_partitions():
         found_disk_letter, _ = os.path.splitdrive(partition.device)
 
         if found_disk_letter == disk_letter + ':':
