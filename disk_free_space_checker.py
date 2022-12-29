@@ -153,7 +153,9 @@ def convert_bytes_to_GB(value_in_bytes: int) -> float:
 
 
 def announce_error(error_message: str):
-    os.environ['DISK_CHECK_ERROR'] = error_message
+    with open('env_inject.txt', 'w') as file:
+        file.write(f'DISK_CHECK_ERROR={error_message}')
+
     print(error_message)
 
 
