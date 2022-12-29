@@ -23,8 +23,8 @@ def check_disks_free_space():
         exit(1)
 
     if validate_min_free_space_input(min_free_space_input) is False:
-        print(f'Invalid "{MIN_FREE_SPACE_ARGUMENT_NAME}" input.'
-              f' You must input only a number that represents space in GB (for example, for 10 GB input 10)')
+        announce_error(f'Invalid "{MIN_FREE_SPACE_ARGUMENT_NAME}" input. '
+                       f'You must input only a number that represents space in GB (for example, for 10 GB input 10)')
         exit(1)
 
     min_free_space_GB = int(min_free_space_input)
@@ -36,8 +36,8 @@ def check_disks_free_space():
         disk_free_space = get_disk_free_space_in_GB(disk)
 
         if disk_free_space < min_free_space_GB:
-            print(f'Not enough free space on disk {disk}: {disk_free_space} GB,'
-                  f' minimum required: {min_free_space_input} GB')
+            announce_error(f'Not enough free space on disk {disk}: {disk_free_space} GB,'
+                           f' minimum required: {min_free_space_input} GB')
             exit(1)
 
     exit(0)
@@ -64,12 +64,12 @@ def validate_disks_input(disks_input: list[str]) -> bool:
     """
     for disk_input in disks_input:
         if re.match(r'^[A-Z]$', disk_input) is False:
-            print(f'Invalid "{DISKS_ARGUMENT_NAME}" input.'
-                  f' You must input only upper case letters of disks (for example C D E)')
+            announce_error(f'Invalid "{DISKS_ARGUMENT_NAME}" input.'
+                           f' You must input only upper case letters of disks (for example C D E)')
             return False
 
         if disk_exists(disk_input) is False:
-            print(f'Disk {disk_input} does not exist.')
+            announce_error(f'Disk {disk_input} does not exist.')
             return False
 
     return True
@@ -110,8 +110,8 @@ def check_min_free_space_input_bounds(disk_letters: list[str], min_free_space_GB
     """
     for disk_letter in disk_letters:
         if get_disk_total_space_in_GB(disk_letter) <= min_free_space_GB:
-            print(f'Wanted minimum free space is {min_free_space_GB} GB,'
-                  f' but disk {disk_letter} has only {get_disk_total_space_in_GB(disk_letter)} GB of total space.')
+            announce_error(f'Wanted minimum free space is {min_free_space_GB} GB,'
+                           f' but disk {disk_letter} has only {get_disk_total_space_in_GB(disk_letter)} GB of total space.')
             return False
 
     return True
@@ -150,6 +150,11 @@ def convert_bytes_to_GB(value_in_bytes: int) -> float:
         :return: not rounded value
     """
     return value_in_bytes / 1024 ** 3
+
+
+def announce_error(error_message: str):
+    os.environ['DISK_CHECK_ERROR'] = error_message
+    print(error_message)
 
 
 if __name__ == '__main__':
