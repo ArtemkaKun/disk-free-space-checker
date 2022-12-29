@@ -10,6 +10,7 @@ import psutil
 import argparse
 
 from psutil._common import sdiskusage
+from sys import exit
 
 MIN_FREE_SPACE_ARGUMENT_NAME = '--min-free-space'
 DISKS_ARGUMENT_NAME = '--disks'
