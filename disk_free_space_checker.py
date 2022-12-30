@@ -2,9 +2,10 @@
     The small tool to check free space on disks and produce an error if free space is less than specified.
     Disks to check defined by disk letters, so in theory this code is Windows specific.
 """
-
+import json
 import os
 import re
+from urllib.request import Request, urlopen
 
 import psutil
 import argparse
@@ -153,10 +154,17 @@ def convert_bytes_to_GB(value_in_bytes: int) -> float:
 
 
 def announce_error(error_message: str):
-    with open('env_inject.txt', 'w') as file:
-        file.write(f'DISK_CHECK_ERROR={error_message}')
-
+    send_message_to_slack(error_message)
     print(error_message)
+
+
+def send_message_to_slack(message: str):
+    headers = {'Content-type': 'application/json'}
+
+    request = Request(CHANNEL_WEB_HOOK,
+                      data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
+                      headers=headers)
+    urlopen(request)
 
 
 if __name__ == '__main__':
