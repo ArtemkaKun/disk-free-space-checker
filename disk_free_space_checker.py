@@ -13,7 +13,7 @@ import argparse
 from psutil._common import sdiskusage
 from sys import exit
 
-MIN_FREE_SPACE_ARGUMENT_NAME = '--min-free-space'
+MIN_FREE_SPACE_ARGUMENT_NAME = '--min-free-space-percent'
 DISKS_ARGUMENT_NAME = '--disks'
 
 
@@ -25,20 +25,20 @@ def check_disks_free_space():
 
     if validate_min_free_space_input(min_free_space_input) is False:
         announce_error(f'Invalid "{MIN_FREE_SPACE_ARGUMENT_NAME}" input. '
-                       f'You must input only a number that represents space in GB (for example, for 10 GB input 10)')
+                       f'You must input only a number that represents space in percent (for example, for 10% input 10)')
         exit(1)
 
-    min_free_space_GB = int(min_free_space_input)
+    min_free_space_percent = int(min_free_space_input)
 
-    if check_min_free_space_input_bounds(disks_input, min_free_space_GB) is False:
-        exit(1)
+    for disk_letter in disks_input:
+        disk_free_space_GB = get_disk_free_space_in_GB(disk_letter)
+        disk_total_space_GB = get_disk_total_space_in_GB(disk_letter)
+        disk_free_space_percent = (disk_free_space_GB / disk_total_space_GB) * 100
+        min_free_space_GB = (disk_total_space_GB / 100) * min_free_space_percent
 
-    for disk in disks_input:
-        disk_free_space = get_disk_free_space_in_GB(disk)
-
-        if disk_free_space < min_free_space_GB:
-            announce_error(f'Not enough free space on disk {disk}: {disk_free_space} GB,'
-                           f' minimum required: {min_free_space_input} GB')
+        if disk_free_space_percent < min_free_space_percent:
+            announce_error(f'Not enough free space on disk {disk_letter}: {disk_free_space_GB:.2f} GB,'
+                           f' minimum required: {min_free_space_input}% ({min_free_space_GB:.2f} GB)')
             exit(1)
 
     exit(0)
@@ -46,13 +46,13 @@ def check_disks_free_space():
 
 def parse_input_arguments() -> tuple[list[str], str]:
     args = parse_arguments()
-    return args.disks, args.min_free_space[0]
+    return args.disks, args.min_free_space_percent[0]
 
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Checks free space on disks')
     parser.add_argument(DISKS_ARGUMENT_NAME, nargs='+', required=True, help='Letters of disks will need be to checked')
-    parser.add_argument(MIN_FREE_SPACE_ARGUMENT_NAME, nargs=1, required=True, help='Minimum free space in GB')
+    parser.add_argument(MIN_FREE_SPACE_ARGUMENT_NAME, nargs=1, required=True, help='Minimum free space in percent')
 
     return parser.parse_args()
 
@@ -99,23 +99,7 @@ def validate_min_free_space_input(min_free_space: str) -> bool:
         :param min_free_space:
         :return:
     """
-    return min_free_space.isdigit() and int(min_free_space) > 0
-
-
-def check_min_free_space_input_bounds(disk_letters: list[str], min_free_space_GB: int) -> bool:
-    """
-        Windows specific code
-        :param disk_letters:
-        :param min_free_space_GB: value should be >= 0 to produce correct result
-        :return:
-    """
-    for disk_letter in disk_letters:
-        if get_disk_total_space_in_GB(disk_letter) <= min_free_space_GB:
-            announce_error(f'Wanted minimum free space is {min_free_space_GB} GB,'
-                           f' but disk {disk_letter} has only {get_disk_total_space_in_GB(disk_letter)} GB of total space.')
-            return False
-
-    return True
+    return min_free_space.isdigit() and 0 < int(min_free_space) < 100
 
 
 def get_disk_total_space_in_GB(disk_letter: str) -> float:
@@ -161,10 +145,10 @@ def announce_error(error_message: str):
 def send_message_to_slack(message: str):
     headers = {'Content-type': 'application/json'}
 
-    request = Request(CHANNEL_WEB_HOOK,
-                      data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
-                      headers=headers)
-    urlopen(request)
+    # request = Request(CHANNEL_WEB_HOOK,
+    #                   data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
+    #                   headers=headers)
+    # urlopen(request)
 
 
 if __name__ == '__main__':

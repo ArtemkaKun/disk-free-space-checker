@@ -14,7 +14,7 @@ def test_validate_special_character_min_space_input_false():
 
 
 def test_validate_injection_min_space_input_false():
-    assert validate_min_free_space_input('100;') is False
+    assert validate_min_free_space_input('10;') is False
 
 
 def test_validate_malicious_code_min_space_input_false():
@@ -22,12 +22,16 @@ def test_validate_malicious_code_min_space_input_false():
 
 
 def test_validate_negative_min_space_input_false():
-    assert validate_min_free_space_input('-100') is False
+    assert validate_min_free_space_input('-10') is False
 
 
 def test_validate_zero_min_space_input_false():
     assert validate_min_free_space_input('0') is False
 
 
+def test_validate_100_min_space_input_false():
+    assert validate_min_free_space_input('100') is False
+
+
 def test_validate_correct_min_space_input_true():
-    assert validate_min_free_space_input('100') is True
+    assert validate_min_free_space_input('10') is True
