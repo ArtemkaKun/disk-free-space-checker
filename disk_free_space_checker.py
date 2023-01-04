@@ -30,6 +30,8 @@ def check_disks_free_space():
 
     min_free_space_percent = int(min_free_space_input)
 
+    error_were_produced = False
+
     for disk_letter in disks_input:
         disk_free_space_GB = get_disk_free_space_in_GB(disk_letter)
         disk_total_space_GB = get_disk_total_space_in_GB(disk_letter)
@@ -43,9 +45,9 @@ def check_disks_free_space():
                 f'\nMinimum required free space - {min_free_space_GB:.2f} GB ({min_free_space_input}%)'
             )
 
-            exit(1)
+            error_were_produced = True
 
-    exit(0)
+    exit(int(error_were_produced))
 
 
 def parse_input_arguments() -> tuple[list[str], str]:
