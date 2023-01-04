@@ -151,7 +151,7 @@ def send_message_to_slack(message: str):
     request = Request(os.getenv('DEVOPS_ERROR_SLACK_CHANNEL_WEBHOOK_URL'),
                       data=json.dumps(
                           {
-                              'text': f"**{os.getenv('NODE_NAME')}**",
+                              'text': f"**{os.getenv('NODE_NAME')}** 🚨",
                               'attachments': [{'color': "#f21", 'text': message}]
                           }
                       ).encode(),
