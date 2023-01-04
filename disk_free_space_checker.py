@@ -145,10 +145,10 @@ def announce_error(error_message: str):
 def send_message_to_slack(message: str):
     headers = {'Content-type': 'application/json'}
 
-    # request = Request(CHANNEL_WEB_HOOK,
-    #                   data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
-    #                   headers=headers)
-    # urlopen(request)
+    request = Request(os.getenv('DEVOPS_ERROR_SLACK_CHANNEL_WEBHOOK_URL'),
+                      data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
+                      headers=headers)
+    urlopen(request)
 
 
 if __name__ == '__main__':
