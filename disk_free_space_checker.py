@@ -146,7 +146,8 @@ def send_message_to_slack(message: str):
     headers = {'Content-type': 'application/json'}
 
     request = Request(os.getenv('DEVOPS_ERROR_SLACK_CHANNEL_WEBHOOK_URL'),
-                      data=json.dumps({'text': message, 'attachments': [{'color': "#f21", 'text': message}]}).encode(),
+                      data=json.dumps({'text': os.getenv('NODE_NAME'),
+                                       'attachments': [{'color': "#f21", 'text': message}]}).encode(),
                       headers=headers)
     urlopen(request)
 
