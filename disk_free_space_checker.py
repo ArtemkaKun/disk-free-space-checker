@@ -38,8 +38,9 @@ def check_disks_free_space():
 
         if disk_free_space_percent < min_free_space_percent:
             announce_error(
-                f'Not enough free space on disk {disk_letter}:\nCurrent free space - {disk_free_space_GB:.2f} GB'
-                f'\nMinimum required free space - {min_free_space_input}% ({min_free_space_GB:.2f} GB)'
+                f'Not enough free space on disk *{disk_letter}*:'
+                f'\nCurrent free space - {disk_free_space_GB:.2f} GB'
+                f'\nMinimum required free space - {min_free_space_GB:.2f} GB ({min_free_space_input}%)'
             )
 
             exit(1)
@@ -151,7 +152,7 @@ def send_message_to_slack(message: str):
     request = Request(os.getenv('DEVOPS_ERROR_SLACK_CHANNEL_WEBHOOK_URL'),
                       data=json.dumps(
                           {
-                              'text': f"**{os.getenv('NODE_NAME')}** 🚨",
+                              'text': f"*{os.getenv('NODE_NAME')}* 🚨",
                               'attachments': [{'color': "#f21", 'text': message}]
                           }
                       ).encode(),
